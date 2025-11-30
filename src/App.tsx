@@ -1,35 +1,37 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
-import "./App.css";
-import { Button } from "@/components/ui/button";
+import { useEffect } from "react";
+import { Toolbar } from "./components/Toolbar";
+import { Widget } from "./components/Widget";
+import { useWidgetStore } from "./store/widgetStore";
 
 function App() {
-  const [count, setCount] = useState(0);
+  const { widgets, removeWidget, selectedWidgetId } = useWidgetStore();
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.key === "Delete" || e.key === "Backspace") && selectedWidgetId) {
+        removeWidget(selectedWidgetId);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedWidgetId, removeWidget]);
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="w-screen h-screen overflow-hidden bg-[url('https://images.unsplash.com/photo-1497250681960-ef046c08a56e?q=80&w=2574&auto=format&fit=crop')] bg-cover bg-center relative">
+      {/* Overlay for better visibility */}
+      <div className="absolute inset-0 bg-black/10 pointer-events-none" />
+
+      {/* Widgets Layer */}
+      <div className="absolute inset-0">
+        {widgets.map((widget) => (
+          <Widget key={widget.id} widget={widget} />
+        ))}
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <Button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </Button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+
+      {/* Toolbar Layer */}
+      <Toolbar />
+    </div>
   );
 }
 
