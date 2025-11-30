@@ -4,7 +4,8 @@ import { Widget } from "./components/Widget";
 import { useWidgetStore } from "./store/widgetStore";
 
 function App() {
-  const { widgets, removeWidget, selectedWidgetId } = useWidgetStore();
+  const { widgets, removeWidget, selectedWidgetId, selectWidget } =
+    useWidgetStore();
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -23,7 +24,14 @@ function App() {
       <div className="absolute inset-0 bg-black/10 pointer-events-none" />
 
       {/* Widgets Layer */}
-      <div className="absolute inset-0">
+      <div
+        className="absolute inset-0"
+        onMouseDown={(e) => {
+          if (e.target === e.currentTarget) {
+            selectWidget(null);
+          }
+        }}
+      >
         {widgets.map((widget) => (
           <Widget key={widget.id} widget={widget} />
         ))}
