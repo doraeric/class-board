@@ -10,6 +10,14 @@ function App() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      const isInput =
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable;
+
+      if (isInput) return;
+
       if ((e.key === "Delete" || e.key === "Backspace") && selectedWidgetId) {
         removeWidget(selectedWidgetId);
       }
