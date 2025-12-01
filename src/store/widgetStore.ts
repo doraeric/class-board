@@ -2,6 +2,13 @@ import { create } from "zustand";
 
 export type WidgetType = "randomizer" | "timer" | "poll" | "image" | "text";
 
+export interface RandomizerData {
+  items: string[];
+  allowRepeats: boolean;
+  lastPicked?: string;
+  pickedItems: string[];
+}
+
 export interface WidgetState {
   id: string;
   type: WidgetType;
@@ -10,6 +17,7 @@ export interface WidgetState {
   width: number;
   height: number;
   zIndex: number;
+  data?: RandomizerData | Record<string, any>;
 }
 
 interface WidgetStore {
@@ -56,6 +64,15 @@ export const useWidgetStore = create<WidgetStore>((set) => ({
         width: 320,
         height: 200,
         zIndex: maxZ + 1,
+        data:
+          type === "randomizer"
+            ? {
+                items: [],
+                allowRepeats: false,
+                lastPicked: undefined,
+                pickedItems: [],
+              }
+            : {},
       };
 
       return {

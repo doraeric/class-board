@@ -4,6 +4,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { cn } from "@/lib/utils";
+import { RandomizerSettings } from "./settings/RandomizerSettings";
 
 export function SettingsPanel() {
   const {
@@ -105,6 +106,10 @@ export function SettingsPanel() {
                 </div>
               </div>
             </div>
+
+            {selectedWidget.type === "randomizer" && (
+              <RandomizerSettings widget={selectedWidget} />
+            )}
           </>
         ) : (
           <div className="text-center text-muted-foreground py-8">

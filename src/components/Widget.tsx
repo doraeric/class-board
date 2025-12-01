@@ -4,6 +4,7 @@ import { useWidgetStore, type WidgetState } from "../store/widgetStore";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
 import { cn } from "@/lib/utils";
+import { RandomizerWidget } from "./widgets/RandomizerWidget";
 
 interface WidgetProps {
   widget: WidgetState;
@@ -75,13 +76,23 @@ export function Widget({ widget }: WidgetProps) {
               : "border hover:border-primary/50"
           )}
         >
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold mb-2 capitalize">
+          <CardContent className="p-4 text-center w-full h-full flex flex-col">
+            <div className="text-sm font-medium text-muted-foreground mb-2 capitalize self-start">
               {widget.type}
             </div>
-            <div className="text-muted-foreground text-sm">
-              {widget.width} x {widget.height}
-            </div>
+
+            {widget.type === "randomizer" ? (
+              <RandomizerWidget widget={widget} />
+            ) : (
+              <>
+                <div className="text-2xl font-bold mb-2 capitalize">
+                  {widget.type}
+                </div>
+                <div className="text-muted-foreground text-sm">
+                  {widget.width} x {widget.height}
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>
