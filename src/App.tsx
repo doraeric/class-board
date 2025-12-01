@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Toolbar } from "./components/Toolbar";
 import { Widget } from "./components/Widget";
+import { SettingsPanel } from "./components/SettingsPanel";
 import { useWidgetStore } from "./store/widgetStore";
 
 function App() {
@@ -37,8 +38,9 @@ function App() {
         ))}
       </div>
 
-      {/* Toolbar Layer */}
+      {/* UI Layer */}
       <Toolbar />
+      <SettingsPanel />
     </div>
   );
 }

@@ -15,7 +15,9 @@ export interface WidgetState {
 interface WidgetStore {
   widgets: WidgetState[];
   selectedWidgetId: string | null;
+  isSettingsPanelOpen: boolean;
 
+  setSettingsPanelOpen: (isOpen: boolean) => void;
   addWidget: (type: WidgetType) => void;
   removeWidget: (id: string) => void;
   selectWidget: (id: string | null) => void;
@@ -29,6 +31,9 @@ interface WidgetStore {
 export const useWidgetStore = create<WidgetStore>((set) => ({
   widgets: [],
   selectedWidgetId: null,
+  isSettingsPanelOpen: false,
+
+  setSettingsPanelOpen: (isOpen) => set({ isSettingsPanelOpen: isOpen }),
 
   addWidget: (type) =>
     set((state) => {
@@ -56,6 +61,7 @@ export const useWidgetStore = create<WidgetStore>((set) => ({
       return {
         widgets: [...state.widgets, newWidget],
         selectedWidgetId: id,
+        isSettingsPanelOpen: state.isSettingsPanelOpen,
       };
     }),
 
@@ -68,7 +74,7 @@ export const useWidgetStore = create<WidgetStore>((set) => ({
 
   selectWidget: (id) =>
     set((state) => {
-      if (!id) return { selectedWidgetId: null };
+      if (!id) return { selectedWidgetId: null, isSettingsPanelOpen: false };
 
       // Also bring to front on select
       const maxZ =
