@@ -7,6 +7,8 @@ export interface RandomizerData {
   allowRepeats: boolean;
   lastPicked?: string;
   pickedItems: string[];
+  source?: "manual" | "list";
+  listId?: string;
 }
 
 export interface WidgetState {
@@ -67,11 +69,11 @@ export const useWidgetStore = create<WidgetStore>((set) => ({
         data:
           type === "randomizer"
             ? {
-                items: [],
-                allowRepeats: false,
-                lastPicked: undefined,
-                pickedItems: [],
-              }
+              items: [],
+              allowRepeats: false,
+              lastPicked: undefined,
+              pickedItems: [],
+            }
             : {},
       };
 

@@ -1,9 +1,10 @@
-import { Button } from "../ui/button";
+import { useListStore } from "@/store/listStore";
 import {
   useWidgetStore,
   type RandomizerData,
   type WidgetState,
 } from "@/store/widgetStore";
+import { Button } from "../ui/button";
 
 interface RandomizerWidgetProps {
   widget: WidgetState;
@@ -11,8 +12,18 @@ interface RandomizerWidgetProps {
 
 export function RandomizerWidget({ widget }: RandomizerWidgetProps) {
   const { updateWidget } = useWidgetStore();
+  const { lists } = useListStore();
   const data = widget.data as RandomizerData;
-  const items = data.items || [];
+
+  // If source is list, get items from the store to ensure they are up to date
+  let items = data.items || [];
+  if (data.source === "list" && data.listId) {
+    const list = lists.find((l) => l.id === data.listId);
+    if (list) {
+      items = list.items;
+    }
+  }
+
   const pickedItems = data.pickedItems || [];
   const allowRepeats = data.allowRepeats || false;
 

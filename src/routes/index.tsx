@@ -1,10 +1,15 @@
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { Toolbar } from "./components/Toolbar";
-import { Widget } from "./components/Widget";
-import { SettingsPanel } from "./components/SettingsPanel";
-import { useWidgetStore } from "./store/widgetStore";
+import { SettingsPanel } from "../components/SettingsPanel";
+import { Toolbar } from "../components/Toolbar";
+import { Widget } from "../components/Widget";
+import { useWidgetStore } from "../store/widgetStore";
 
-function App() {
+export const Route = createFileRoute("/")({
+  component: Index,
+});
+
+function Index() {
   const { widgets, removeWidget, selectedWidgetId, selectWidget } =
     useWidgetStore();
 
@@ -52,5 +57,3 @@ function App() {
     </div>
   );
 }
-
-export default App;
