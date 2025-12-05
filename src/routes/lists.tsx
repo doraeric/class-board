@@ -1,6 +1,22 @@
 import { cn } from "@/lib/utils";
+import {
+  closestCenter,
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, GripVertical, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -12,10 +28,78 @@ export const Route = createFileRoute("/lists")({
   component: ListManager,
 });
 
+function SortableList({
+  list,
+  isSelected,
+  onClick,
+  onDelete,
+}: {
+  list: { id: string; name: string };
+  isSelected: boolean;
+  onClick: () => void;
+  onDelete: (e: React.MouseEvent) => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: list.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 1 : 0,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        "flex items-center justify-between p-2 rounded-md cursor-pointer hover:bg-accent group",
+        isSelected && "bg-accent"
+      )}
+      onClick={onClick}
+    >
+      <div className="flex items-center gap-2 overflow-hidden">
+        <div
+          {...attributes}
+          {...listeners}
+          className="cursor-grab hover:text-foreground text-muted-foreground/50"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <GripVertical className="h-4 w-4" />
+        </div>
+        <span className="truncate text-sm font-medium">{list.name}</span>
+      </div>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-6 w-6 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive"
+        onClick={onDelete}
+      >
+        <Trash2 className="h-3 w-3" />
+      </Button>
+    </div>
+  );
+}
+
 function ListManager() {
-  const { lists, addList, updateList, removeList } = useListStore();
+  const { lists, addList, updateList, removeList, reorderLists } =
+    useListStore();
   const [selectedListId, setSelectedListId] = useState<string | null>(null);
   const [newListName, setNewListName] = useState("");
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   const selectedList = lists.find((l) => l.id === selectedListId);
 
@@ -24,6 +108,16 @@ function ListManager() {
     if (newListName.trim()) {
       addList(newListName.trim());
       setNewListName("");
+    }
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = lists.findIndex((l) => l.id === active.id);
+      const newIndex = lists.findIndex((l) => l.id === over.id);
+      reorderLists(oldIndex, newIndex);
     }
   };
 
@@ -55,32 +149,32 @@ function ListManager() {
         </div>
 
         <div className="flex-1 overflow-y-auto p-2 space-y-1">
-          {lists.map((list) => (
-            <div
-              key={list.id}
-              className={cn(
-                "flex items-center justify-between p-2 rounded-md cursor-pointer hover:bg-accent group",
-                selectedListId === list.id && "bg-accent"
-              )}
-              onClick={() => setSelectedListId(list.id)}
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={lists}
+              strategy={verticalListSortingStrategy}
             >
-              <span className="truncate text-sm font-medium">{list.name}</span>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (confirm("Delete this list?")) {
-                    removeList(list.id);
-                    if (selectedListId === list.id) setSelectedListId(null);
-                  }
-                }}
-              >
-                <Trash2 className="h-3 w-3" />
-              </Button>
-            </div>
-          ))}
+              {lists.map((list) => (
+                <SortableList
+                  key={list.id}
+                  list={list}
+                  isSelected={selectedListId === list.id}
+                  onClick={() => setSelectedListId(list.id)}
+                  onDelete={(e) => {
+                    e.stopPropagation();
+                    if (confirm("Delete this list?")) {
+                      removeList(list.id);
+                      if (selectedListId === list.id) setSelectedListId(null);
+                    }
+                  }}
+                />
+              ))}
+            </SortableContext>
+          </DndContext>
           {lists.length === 0 && (
             <div className="text-center text-xs text-muted-foreground py-4">
               No lists yet. Create one above!

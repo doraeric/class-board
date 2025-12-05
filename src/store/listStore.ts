@@ -1,3 +1,4 @@
+import { arrayMove } from "@dnd-kit/sortable";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -12,6 +13,7 @@ interface ListStore {
   addList: (name: string) => void;
   updateList: (id: string, updates: Partial<List>) => void;
   removeList: (id: string) => void;
+  reorderLists: (oldIndex: number, newIndex: number) => void;
 }
 
 export const useListStore = create<ListStore>()(
@@ -31,6 +33,10 @@ export const useListStore = create<ListStore>()(
       removeList: (id) =>
         set((state) => ({
           lists: state.lists.filter((list) => list.id !== id),
+        })),
+      reorderLists: (oldIndex, newIndex) =>
+        set((state) => ({
+          lists: arrayMove(state.lists, oldIndex, newIndex),
         })),
     }),
     {
